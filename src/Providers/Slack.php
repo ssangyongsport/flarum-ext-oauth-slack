@@ -1,30 +1,22 @@
 <?php
 
-/*
- * This file is part of blomstra/oauth-logto.
- *
- * Copyright (c) 2022 Team Blomstra.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
-namespace Blomstra\OAuthSlack\Providers;
+namespace Blomstra\OAuthLogto\Providers;
 
 use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
-use League\OAuth2\Client\Provider\AbstractProvider;
+use Logto\Sdk\LogtoClient;
+use Logto\Sdk\LogtoConfig;
 
-class Slack extends Provider
+class Logto extends Provider
 {
     /**
-     * @var LogtoProvider
+     * @var LogtoClient
      */
-    protected $provider;
+    protected $client;
 
     public function name(): string
     {
-        return 'slack';
+        return 'logto';
     }
 
     public function link(): string
@@ -35,33 +27,39 @@ class Slack extends Provider
     public function fields(): array
     {
         return [
-            'client_id'     => 'required',
-            'client_secret' => 'required',
+            'endpoint'     => 'required',
+            'app_id'       => 'required',
+            'app_secret'   => 'required',
         ];
     }
 
-    public function provider(string $redirectUri): AbstractProvider
+    public function provider(string $redirectUri): LogtoClient
     {
-        return $this->provider = new LogtoProvider([
-            'clientId'     => $this->getSetting('client_id'),
-            'clientSecret' => $this->getSetting('client_secret'),
-            'redirectUri'  => $redirectUri,
-        ]);
+        return $this->client = new LogtoClient(
+            new LogtoConfig(
+                endpoint: $this->getSetting('endpoint'),
+                appId: $this->getSetting('app_id'),
+                appSecret: $this->getSetting('app_secret'),
+                scopes: ['openid', 'profile', 'email', 'phone', 'custom_data', 'identities']
+            )
+        );
     }
 
     public function options(): array
     {
-        return ['scope' => ['openid', 'email', 'profile', 'offline_access']];
+        return [];
     }
 
     public function suggestions(Registration $registration, $user, string $token)
     {
-        $this->verifyEmail($email = $user->getEmail());
+        $userInfo = $this->client->fetchUserInfo();
+
+        $this->verifyEmail($email = $userInfo->email);
 
         $registration
             ->provideTrustedEmail($email)
-            ->provideAvatar($user->getPicture())
-            ->suggestUsername($user->getName())
-            ->setPayload($user->toArray());
+            ->provideAvatar($userInfo->picture)
+            ->suggestUsername($userInfo->name)
+            ->setPayload($userInfo->toArray());
     }
 }
