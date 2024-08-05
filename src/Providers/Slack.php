@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of blomstra/oauth-slack.
+ * This file is part of blomstra/oauth-logto.
  *
  * Copyright (c) 2022 Team Blomstra.
  *
@@ -18,7 +18,7 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 class Slack extends Provider
 {
     /**
-     * @var SlackProvider
+     * @var LogtoProvider
      */
     protected $provider;
 
@@ -29,7 +29,7 @@ class Slack extends Provider
 
     public function link(): string
     {
-        return 'https://api.slack.com/authentication/sign-in-with-slack';
+        return 'https://docs.logto.io/docs/intro';
     }
 
     public function fields(): array
@@ -42,7 +42,7 @@ class Slack extends Provider
 
     public function provider(string $redirectUri): AbstractProvider
     {
-        return $this->provider = new SlackProvider([
+        return $this->provider = new LogtoProvider([
             'clientId'     => $this->getSetting('client_id'),
             'clientSecret' => $this->getSetting('client_secret'),
             'redirectUri'  => $redirectUri,
@@ -60,7 +60,7 @@ class Slack extends Provider
 
         $registration
             ->provideTrustedEmail($email)
-            ->provideAvatar($user->getImage192())
+            ->provideAvatar($user->getPicture())
             ->suggestUsername($user->getName())
             ->setPayload($user->toArray());
     }
