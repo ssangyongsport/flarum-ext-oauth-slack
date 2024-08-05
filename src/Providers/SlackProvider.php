@@ -9,39 +9,51 @@
  * file that was distributed with this source code.
  */
 
-namespace Blomstra\OAuthSlack\Providers;
+namespace Blomstra\OAuthLogto\Providers;
 
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Http\Message\ResponseInterface;
 
-class SlackProvider extends AbstractProvider
+class LogtoProvider extends AbstractProvider
 {
+    protected $endpoint;
+
+    public function __construct(array $options = [])
+    {
+        parent::__construct($options);
+        $this->endpoint = $options['endpoint'] ?? 'https://auth.ssangyongsports.eu.org';
+    }
+
     public function getBaseAuthorizationUrl()
     {
-        return 'https://auth.ssangyongsports.eu.org/oidc/auth';
+        return $this->endpoint . '/oidc/auth';
     }
 
     public function getBaseAccessTokenUrl(array $params)
     {
-        return 'https://auth.ssangyongsports.eu.org/oidc/token';
+        return $this->endpoint . '/oidc/token';
     }
 
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        return 'https://auth.ssangyongsports.eu.org/oidc/me';
+        return $this->endpoint . '/oidc/me';
     }
 
     protected function getDefaultScopes()
     {
-        return ['openid', 'profile', 'email'];
+        return ['openid', 'profile', 'email', 'phone', 'custom_data', 'identities'];
     }
 
     protected function checkResponse(ResponseInterface $response, $data)
     {
         if (isset($data['error'])) {
-            throw new IdentityProviderException($data['error_description'] ?? 'Unknown error', $response->getStatusCode(), $data);
+            throw new IdentityProviderException(
+                $data['error_description'] ?? $data['error'] ?? 'Unknown error',
+                $response->getStatusCode(),
+                $data
+            );
         }
     }
 
