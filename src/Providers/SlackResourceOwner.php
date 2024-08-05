@@ -14,7 +14,7 @@ namespace Blomstra\OAuthSlack\Providers;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
-class LogtoResourceOwner implements ResourceOwnerInterface
+class SlackResourceOwner implements ResourceOwnerInterface
 {
     protected $response;
 
