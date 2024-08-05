@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of blomstra/oauth-slack.
+ * This file is part of blomstra/oauth-logto.
  *
  * Copyright (c) 2022 Team Blomstra.
  *
@@ -14,7 +14,7 @@ namespace Blomstra\OAuthSlack\Providers;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
-class SlackResourceOwner implements ResourceOwnerInterface
+class LogtoResourceOwner implements ResourceOwnerInterface
 {
     protected $response;
 
@@ -30,7 +30,7 @@ class SlackResourceOwner implements ResourceOwnerInterface
 
     public function getId(): ?string
     {
-        return Arr::get($this->response, 'https://slack.com/user_id');
+        return Arr::get($this->response, 'sub'); // 'sub' is the standard claim for the subject identifier
     }
 
     public function getName(): ?string
@@ -53,8 +53,8 @@ class SlackResourceOwner implements ResourceOwnerInterface
         return Arr::get($this->response, 'email');
     }
 
-    public function getImage192(): ?string
+    public function getPicture(): ?string
     {
-        return Arr::get($this->response, 'https://slack.com/user_image_192');
+        return Arr::get($this->response, 'picture'); // 'picture' is the standard claim for profile image
     }
 }
