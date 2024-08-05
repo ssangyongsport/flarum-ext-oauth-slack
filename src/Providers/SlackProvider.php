@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of blomstra/oauth-slack.
+ * This file is part of blomstra/oauth-logto.
  *
  * Copyright (c) 2022 Team Blomstra.
  *
@@ -35,19 +35,19 @@ class SlackProvider extends AbstractProvider
 
     protected function getDefaultScopes()
     {
-        return [];
+        return ['openid', 'profile', 'email'];
     }
 
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        if (isset($data['ok']) && $data['ok'] === false) {
-            throw new IdentityProviderException($data['error'], null, $data);
+        if (isset($data['error'])) {
+            throw new IdentityProviderException($data['error_description'] ?? 'Unknown error', $response->getStatusCode(), $data);
         }
     }
 
     protected function createResourceOwner(array $response, AccessToken $token)
     {
-        return new SlackResourceOwner($response);
+        return new LogtoResourceOwner($response);
     }
 
     protected function prepareAccessTokenResponse(array $result)
@@ -62,6 +62,6 @@ class SlackProvider extends AbstractProvider
 
     protected function getAuthorizationHeaders($token = null)
     {
-        return ['Authorization' => 'Bearer '.$token];
+        return ['Authorization' => 'Bearer ' . $token];
     }
 }
